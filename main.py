@@ -24,25 +24,33 @@ If error happens:
    within your browser (assuming you can open ClassDojo website)
 """
 
-import requests
 import json
 import os
 import tempfile
 
+import requests
+from dotenv import load_dotenv
+
+load_dotenv()
+
 FEED_URL = "https://home.classdojo.com/api/storyFeed?includePrivate=true"
+
+# make sure that classdojo_output dir exists, if not create it
+
 DESTINATION = tempfile.mkdtemp(
     dir="classdojo_output"
 )  # make sure this directory exists in the same place as this script.
+
 SESSION_COOKIES = {
-    "dojo_log_session_id": "27b15207-8893-44af-8774-4392472bd2bf",
-    "dojo_login.sid": "cq%2FQVPiiegVy7uhiftZtiIlLwCBXPLa26f5EQ",
-    "dojo_home_login.sid": "s:_Co1ajtYGcd5J_nrBnZHMceYMjErA052.SjIACEcq/QVPiiegVy7uhiftZtiIlLwCBXPLa26f5EQ",
+    "dojo_log_session_id": os.getenv("dojo_log_session_id"), #noqa SIM112
+    "dojo_login.sid": os.getenv("dojo_login.sid"), #noqa SIM112
+    "dojo_home_login.sid": os.getenv("dojo_home_login.sid"), #noqa SIM112
 }
 NOT_BEFORE = "0000-00-00"  # '2020-08-22'
 
 
 def get_items(feed_url):
-    print("Fetching items: %s ..." % feed_url)
+    print(f"Fetching items: {feed_url} ...")
     resp = requests.get(feed_url, cookies=SESSION_COOKIES)
     data = resp.json()
     prev = data.get("_links", {}).get("prev", {}).get("href")
@@ -105,7 +113,7 @@ def download_contents(contents, total):
         description_name = "{}_{}_{}_description.txt".format(
             entry["day"], entry["group"], entry["base_name"]
         )
-        with open(os.path.join(DESTINATION, description_name), "wt") as fd:
+        with open(os.path.join(DESTINATION, description_name), "w") as fd:
             fd.write(entry["description"])
         for item in entry["attachments"]:
             index += 1
@@ -125,7 +133,7 @@ def download_contents(contents, total):
             with open(filename, "wb") as fd:
                 resp = requests.get(url, cookies=SESSION_COOKIES)
                 fd.write(resp.content)
-    print("Last day of data download: {}".format(highest_day))
+    print(f"Last day of data download: {highest_day}")
     print("Done!")
 
 
