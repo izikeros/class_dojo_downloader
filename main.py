@@ -65,11 +65,15 @@ def get_contents(feed_url):
     total = 0
     for item in items:
         data = item["contents"]
+        group = item["headerSubtext"]
+        # sanitize group name - replace spaces with underscores
+        group = group.replace(" ", "_")
         entry = {
             "description": data.get("body"),
             "base_name": None,
             "day": None,
             "attachments": [],
+            "group": group,
         }
         attachments = data.get("attachments", {})
         if not attachments:
@@ -98,8 +102,8 @@ def download_contents(contents, total):
     index = 0
     highest_day = contents[0]["day"]
     for entry in contents:
-        description_name = "{}_{}_description.txt".format(
-            entry["day"], entry["base_name"]
+        description_name = "{}_{}_{}_description.txt".format(
+            entry["day"], entry["group"], entry["base_name"]
         )
         with open(os.path.join(DESTINATION, description_name), "wt") as fd:
             fd.write(entry["description"])
@@ -111,7 +115,9 @@ def download_contents(contents, total):
             url = item["url"]
             filename = os.path.join(
                 DESTINATION,
-                "{}_{}_{}".format(entry["day"], entry["base_name"], item["name"]),
+                "{}_{}_{}_{}".format(
+                    entry["day"], entry["group"], entry["base_name"], item["name"]
+                ),
             )
             if os.path.exists(filename):
                 continue
