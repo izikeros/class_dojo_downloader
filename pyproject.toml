@@ -1,0 +1,23 @@
+[project]
+name = "class_dojo_downloader"
+version = "0.1.0"
+description = "Default template for PDM package"
+authors = [
+    {name = "unknown", email = "unknown"},
+]
+dependencies = [
+    "requests",
+    "python-dotenv>=1.0.1",
+]
+requires-python = "==3.12.*"
+readme = "README.md"
+license = {text = "MIT"}
+
+
+[tool.pdm]
+distribution = false
+
+[tool.pdm.dev-dependencies]
+dev = [
+    "ruff>=0.4.7",
+]
