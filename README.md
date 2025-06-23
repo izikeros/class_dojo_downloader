@@ -2,7 +2,7 @@
 
 Download all ClassDojo notes, photos, and videos from your timeline.
 
-> NOTE: The original author is unknown. The original script mentions kecebongsoft, and the earliest gist is by dedy-purwanto, at https://gist.github.com/dedy-purwanto/6ad1fa7c702981f35f25da780c50914d
+> NOTE: The original author is kecebongsoft / dedy-purwanto, at https://gist.github.com/dedy-purwanto/6ad1fa7c702981f35f25da780c50914d
 > >
 > This version has several features not present in the original version:
 > - add group name to the downloaded files (useful for multiple children
