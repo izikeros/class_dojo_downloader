@@ -46,8 +46,8 @@ SESSION_COOKIES = {
     "dojo_login.sid": os.getenv("dojo_login.sid"), #noqa SIM112
     "dojo_home_login.sid": os.getenv("dojo_home_login.sid"), #noqa SIM112
 }
-NOT_BEFORE = "0000-00-00"  # '2020-08-22'
 
+NOT_BEFORE = os.getenv("NOT_BEFORE", "0000-00-00")
 
 def get_items(feed_url):
     print(f"Fetching items: {feed_url} ...")
