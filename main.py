@@ -42,11 +42,12 @@ DESTINATION = tempfile.mkdtemp(
 )  # make sure this directory exists in the same place as this script.
 
 SESSION_COOKIES = {
-    "dojo_log_session_id": os.getenv("dojo_log_session_id"), #noqa SIM112
-    "dojo_login.sid": os.getenv("dojo_login.sid"), #noqa SIM112
-    "dojo_home_login.sid": os.getenv("dojo_home_login.sid"), #noqa SIM112
+    "dojo_log_session_id": os.getenv("dojo_log_session_id"),
+    "dojo_login.sid": os.getenv("dojo_login.sid"),
+    "dojo_home_login.sid": os.getenv("dojo_home_login.sid"),
 }
-NOT_BEFORE = "0000-00-00"  # '2020-08-22'
+
+NOT_BEFORE = os.getenv("NOT_BEFORE")
 
 
 def get_items(feed_url):
@@ -123,8 +124,9 @@ def download_contents(contents, total):
             url = item["url"]
             filename = os.path.join(
                 DESTINATION,
-                "{}_{}_{}_{}".format(
-                    entry["day"], entry["group"], entry["base_name"], item["name"]
+# slicing the base_name and name variables  
+                "{}_{}_{}_{}_media.jpg".format(
+                    entry["day"], entry["group"], entry["base_name"][:5], item["name"][:10]
                 ),
             )
             if os.path.exists(filename):
