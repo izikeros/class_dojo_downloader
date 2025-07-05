@@ -44,11 +44,12 @@ DESTINATION = tempfile.mkdtemp(
 )  # make sure this directory exists in the same place as this script.
 
 SESSION_COOKIES = {
-    "dojo_log_session_id": os.getenv("dojo_log_session_id"), #noqa SIM112
-    "dojo_login.sid": os.getenv("dojo_login.sid"), #noqa SIM112
-    "dojo_home_login.sid": os.getenv("dojo_home_login.sid"), #noqa SIM112
+    "dojo_log_session_id": os.getenv("dojo_log_session_id"),
+    "dojo_login.sid": os.getenv("dojo_login.sid"),
+    "dojo_home_login.sid": os.getenv("dojo_home_login.sid"),
 }
-NOT_BEFORE = "0000-00-00"  # '2020-08-22'
+
+NOT_BEFORE = os.getenv("NOT_BEFORE")
 
 
 def extract_clean_filename(url_or_filename):
@@ -185,6 +186,7 @@ def download_contents(contents, total):
             url = item["url"]
             raw_filename = "{}_{}_{}_{}".format(
                 entry["day"], entry["group"], entry["base_name"], item["name"]
+
             )
             filename = safe_filepath(DESTINATION, raw_filename)
             if os.path.exists(filename):
