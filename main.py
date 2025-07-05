@@ -28,7 +28,7 @@ import hashlib
 import json
 import os
 import tempfile
-from urllib.parse import urlparse, unquote
+from urllib.parse import unquote, urlparse
 
 import requests
 from dotenv import load_dotenv
@@ -44,12 +44,12 @@ DESTINATION = tempfile.mkdtemp(
 )  # make sure this directory exists in the same place as this script.
 
 SESSION_COOKIES = {
-    "dojo_log_session_id": os.getenv("dojo_log_session_id"),
-    "dojo_login.sid": os.getenv("dojo_login.sid"),
-    "dojo_home_login.sid": os.getenv("dojo_home_login.sid"),
+    "dojo_log_session_id": os.getenv("DOJO_LOG_SESSION_ID"),
+    "dojo_login.sid": os.getenv("DOJO_LOGIN.SID"),
+    "dojo_home_login.sid": os.getenv("DOJO_HOME_LOGIN.SID"),
 }
 
-NOT_BEFORE = os.getenv("NOT_BEFORE")
+NOT_BEFORE = os.getenv("NOT_BEFORE", "0000-00-00")
 
 
 def extract_clean_filename(url_or_filename):
