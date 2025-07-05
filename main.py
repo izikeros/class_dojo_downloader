@@ -24,9 +24,11 @@ If error happens:
    within your browser (assuming you can open ClassDojo website)
 """
 
+import hashlib
 import json
 import os
 import tempfile
+from urllib.parse import urlparse, unquote
 
 import requests
 from dotenv import load_dotenv
@@ -42,13 +44,73 @@ DESTINATION = tempfile.mkdtemp(
 )  # make sure this directory exists in the same place as this script.
 
 SESSION_COOKIES = {
-    "dojo_log_session_id": os.getenv("dojo_log_session_id"), #noqa SIM112
-    "dojo_login.sid": os.getenv("dojo_login.sid"), #noqa SIM112
-    "dojo_home_login.sid": os.getenv("dojo_home_login.sid"), #noqa SIM112
+    "dojo_log_session_id": os.getenv("dojo_log_session_id"),
+    "dojo_login.sid": os.getenv("dojo_login.sid"),
+    "dojo_home_login.sid": os.getenv("dojo_home_login.sid"),
 }
 
 NOT_BEFORE = os.getenv("NOT_BEFORE", "0000-00-00")
 
+
+def extract_clean_filename(url_or_filename):
+    """
+    Extract a clean filename from a URL or filename string.
+    Removes query parameters and decodes URL encoding.
+    """
+    if '?' in url_or_filename:
+        url_or_filename = url_or_filename.split('?')[0]
+
+    parsed = urlparse(url_or_filename)
+    if parsed.path:
+        filename = os.path.basename(parsed.path)
+    else:
+        filename = os.path.basename(url_or_filename)
+
+    filename = unquote(filename)
+
+    if not filename or filename == '/':
+        filename = 'file'
+
+    return filename
+
+
+def safe_filename(filename, max_length=255):
+    """
+    Safely truncate filename to fit within filesystem limits while preserving extension.
+    Uses hash to ensure uniqueness when truncating.
+    """
+    if len(filename) <= max_length:
+        return filename
+
+    name, ext = os.path.splitext(filename)
+    hash_suffix = hashlib.md5(filename.encode()).hexdigest()[:8]
+
+    available_length = max_length - len(ext) - len(hash_suffix) - 1
+    if available_length <= 0:
+        available_length = 8
+        name = name[:available_length]
+    else:
+        name = name[:available_length]
+
+    return f"{name}_{hash_suffix}{ext}"
+
+
+def safe_filepath(directory, filename, max_filename_length=100):
+    """
+    Create a safe filepath by ensuring the filename component doesn't exceed limits.
+    Uses a more conservative limit to account for directory path length.
+    """
+    clean_filename = extract_clean_filename(filename)
+    safe_name = safe_filename(clean_filename, max_filename_length)
+    full_path = os.path.join(directory, safe_name)
+
+    if len(full_path) > 500:
+        shorter_name = safe_filename(clean_filename, 50)
+        full_path = os.path.join(directory, shorter_name)
+
+    return full_path
+
+ 
 def get_items(feed_url):
     print(f"Fetching items: {feed_url} ...")
     resp = requests.get(feed_url, cookies=SESSION_COOKIES)
@@ -113,7 +175,8 @@ def download_contents(contents, total):
         description_name = "{}_{}_{}_description.txt".format(
             entry["day"], entry["group"], entry["base_name"]
         )
-        with open(os.path.join(DESTINATION, description_name), "w") as fd:
+        description_path = safe_filepath(DESTINATION, description_name)
+        with open(description_path, "w") as fd:
             fd.write(entry["description"])
         for item in entry["attachments"]:
             index += 1
@@ -121,15 +184,15 @@ def download_contents(contents, total):
             if day > highest_day:
                 highest_day = day
             url = item["url"]
-            filename = os.path.join(
-                DESTINATION,
-                "{}_{}_{}_{}".format(
-                    entry["day"], entry["group"], entry["base_name"], item["name"]
-                ),
+            raw_filename = "{}_{}_{}_{}".format(
+                entry["day"], entry["group"], entry["base_name"], item["name"]
+
             )
+            filename = safe_filepath(DESTINATION, raw_filename)
             if os.path.exists(filename):
                 continue
-            print("Downloading {}/{} on {}: {}".format(index, total, day, item["name"]))
+            print("Downloading {}/{} on {}: {}".format(index, total, day, extract_clean_filename(item["name"])))
+            print(f"Saving to: {os.path.basename(filename)}")
             with open(filename, "wb") as fd:
                 resp = requests.get(url, cookies=SESSION_COOKIES)
                 fd.write(resp.content)
