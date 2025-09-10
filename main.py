@@ -3,17 +3,20 @@
 """
 Download all ClassDojo photos and videos in your timeline.
 by kecebongsoft
+
 How it works:
 1. Fetch list of items in the timeline, if there are multiple pages,
    it will fetch for all pages.
 2. Collect list of URLs for the attachment for each item
 3. Download the files into local temporary directory, and also save
    the timeline activity as a json file.
+
 How to use:
 1. Modify the session cookie in this script, check your session cookie
    by opening classdojo in browser and copy the following cookies:
    dojo_log_session_id, dojo_login.sid, and dojo_home_login.sid
 2. Run this script and wait for it to finish.
+
 If error happens:
 1. I ran this script in windows, make sure your path is correct if you
    are on linux
