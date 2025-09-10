@@ -179,7 +179,7 @@ def download_contents(contents, total):
             entry["day"], entry["group"], entry["base_name"]
         )
         description_path = safe_filepath(DESTINATION, description_name)
-        with open(description_path, "w") as fd:
+        with open(description_path, "w", encoding="utf-8") as fd:
             fd.write(entry["description"])
         for item in entry["attachments"]:
             index += 1
