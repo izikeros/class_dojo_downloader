@@ -3,7 +3,6 @@ name = "class_dojo_downloader"
 version = "0.1.0"
 description = "Default template for PDM package"
 authors = [
-    {name = "unknown", email = "unknown"},
     {name = "Krystian Safjan", email = "ksafjan@gmail.com"},
 ]
 dependencies = [
