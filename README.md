@@ -10,21 +10,60 @@ Download all ClassDojo notes, photos, and videos from your timeline.
 > - use .env file for storing session cookies and "start" date (NOT_BEFORE) value
 > - updated README extended on e.g. instructions on how to get session cookies
 
-## Prerequisites
-- create virtual environment with `requests` and `python-dotenv` packages. You can use `pdm` or just pure Python:
+## How to Launch
+
+### Method 1: Using PDM (Recommended)
+
+If you have PDM installed:
 
 ```sh
-# create venv
-python3 -m venv venv
+# Install dependencies
+pdm install
 
-# activate
-source venv/bin/activate
-
-# install dependencies
-pip install requests python-dotenv
+# Run the application
+pdm run python main.py
 ```
 
-## Usage
+### Method 2: Using pip with virtual environment
+
+```sh
+# Create virtual environment
+python3 -m venv venv
+
+# Activate virtual environment
+source venv/bin/activate  # On macOS/Linux
+# or
+venv\Scripts\activate     # On Windows
+
+# Install dependencies
+pip install requests python-dotenv
+
+# Run the application
+python main.py
+```
+
+### Method 3: Using requirements.txt
+
+```sh
+# Create virtual environment
+python3 -m venv venv
+
+# Activate virtual environment  
+source venv/bin/activate
+
+# Install dependencies from requirements.txt
+pip install -r requirements.txt
+
+# Run the application
+python main.py
+```
+
+## Prerequisites
+- Python 3.12
+- Required packages: `requests` and `python-dotenv`
+- ClassDojo account with access to timeline data
+
+## Setup and Usage
 
 1. Create the folder/directory "classdojo_output" in the same folder as this script
 2. Copy the `.env_template` to `.env` and add your session cookie values. Check your session cookie by opening ClassDojo in the browser and copy the following cookies (See the section below "Reading Cookies" for more information on how to get the cookies.) :
@@ -32,7 +71,7 @@ pip install requests python-dotenv
    - `dojo_login.sid`,
    - `dojo_home_login.sid`
 3. You will also want to edit NOT_BEFORE to align to the beginning of the school year you want to download.
-4. Run this script ( source venv/bin/activate ; python3 main.py ) and wait for it to finish.
+4. Run the script using one of the methods described in the "How to Launch" section above and wait for it to finish.
 
 ### Troubleshooting
 
