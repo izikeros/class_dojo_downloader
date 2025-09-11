@@ -4,10 +4,12 @@ version = "0.1.0"
 description = "Default template for PDM package"
 authors = [
     {name = "unknown", email = "unknown"},
+    {name = "Krystian Safjan", email = "ksafjan@gmail.com"},
 ]
 dependencies = [
     "requests",
     "python-dotenv>=1.0.1",
+    "python-dotenv",
 ]
 requires-python = "==3.12.*"
 readme = "README.md"
