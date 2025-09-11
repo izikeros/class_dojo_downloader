@@ -41,9 +41,12 @@ load_dotenv()
 FEED_URL = "https://home.classdojo.com/api/storyFeed?includePrivate=true"
 
 # make sure that classdojo_output dir exists, if not create it
+output_dir = "classdojo_output"
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
 
 DESTINATION = tempfile.mkdtemp(
-    dir="classdojo_output"
+    dir=output_dir
 )  # make sure this directory exists in the same place as this script.
 
 SESSION_COOKIES = {
@@ -60,8 +63,8 @@ def extract_clean_filename(url_or_filename):
     Extract a clean filename from a URL or filename string.
     Removes query parameters and decodes URL encoding.
     """
-    if '?' in url_or_filename:
-        url_or_filename = url_or_filename.split('?')[0]
+    if "?" in url_or_filename:
+        url_or_filename = url_or_filename.split("?")[0]
 
     parsed = urlparse(url_or_filename)
     if parsed.path:
@@ -71,8 +74,8 @@ def extract_clean_filename(url_or_filename):
 
     filename = unquote(filename)
 
-    if not filename or filename == '/':
-        filename = 'file'
+    if not filename or filename == "/":
+        filename = "file"
 
     return filename
 
@@ -189,12 +192,15 @@ def download_contents(contents, total):
             url = item["url"]
             raw_filename = "{}_{}_{}_{}".format(
                 entry["day"], entry["group"], entry["base_name"], item["name"]
-
             )
             filename = safe_filepath(DESTINATION, raw_filename)
             if os.path.exists(filename):
                 continue
-            print("Downloading {}/{} on {}: {}".format(index, total, day, extract_clean_filename(item["name"])))
+            print(
+                "Downloading {}/{} on {}: {}".format(
+                    index, total, day, extract_clean_filename(item["name"])
+                )
+            )
             print(f"Saving to: {os.path.basename(filename)}")
             with open(filename, "wb") as fd:
                 resp = requests.get(url, cookies=SESSION_COOKIES)

@@ -2,3 +2,4 @@
 classdojo_output/
 .env
 .env
+classdojo_output*
