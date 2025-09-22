@@ -31,6 +31,8 @@ import hashlib
 import json
 import os
 import tempfile
+import time
+from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import unquote, urlparse
 
 import requests
@@ -174,16 +176,48 @@ def get_contents(feed_url):
     return contents, total
 
 
+def download_single_file(url, filename, cookies, index, total, day, item_name):
+    """
+    Download a single file with error handling and rate limiting.
+    """
+    if os.path.exists(filename):
+        return
+
+    print(f"Downloading {index}/{total} on {day}: {extract_clean_filename(item_name)}")
+    print(f"Saving to: {os.path.basename(filename)}")
+
+    try:
+        resp = requests.get(url, cookies=cookies)
+        resp.raise_for_status()
+
+        with open(filename, "wb") as fd:
+            fd.write(resp.content)
+
+        # Add small delay to be respectful to the server
+        time.sleep(0.5)
+
+    except requests.RequestException as e:
+        print(f"Error downloading {filename}: {e}")
+    except Exception as e:
+        print(f"Unexpected error downloading {filename}: {e}")
+
+
 def download_contents(contents, total):
+    download_tasks = []
     index = 0
-    highest_day = contents[0]["day"]
+    highest_day = contents[0]["day"] if contents else ""
+
+    # First, collect all download tasks
     for entry in contents:
+        # Save description file first
         description_name = "{}_{}_{}_description.txt".format(
             entry["day"], entry["group"], entry["base_name"]
         )
         description_path = safe_filepath(DESTINATION, description_name)
         with open(description_path, "w", encoding="utf-8") as fd:
             fd.write(entry["description"])
+
+        # Collect attachment download tasks
         for item in entry["attachments"]:
             index += 1
             day = entry["day"]
@@ -194,17 +228,29 @@ def download_contents(contents, total):
                 entry["day"], entry["group"], entry["base_name"], item["name"]
             )
             filename = safe_filepath(DESTINATION, raw_filename)
+
+            # Skip if file already exists
             if os.path.exists(filename):
                 continue
-            print(
-                "Downloading {}/{} on {}: {}".format(
-                    index, total, day, extract_clean_filename(item["name"])
-                )
+
+            download_tasks.append(
+                (url, filename, SESSION_COOKIES, index, total, day, item["name"])
             )
-            print(f"Saving to: {os.path.basename(filename)}")
-            with open(filename, "wb") as fd:
-                resp = requests.get(url, cookies=SESSION_COOKIES)
-                fd.write(resp.content)
+
+    # Execute downloads with ThreadPoolExecutor (limit concurrent downloads to 5)
+    print(f"Starting threaded download of {len(download_tasks)} files...")
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        futures = [
+            executor.submit(download_single_file, *task) for task in download_tasks
+        ]
+
+        # Wait for all downloads to complete
+        for future in futures:
+            try:
+                future.result()
+            except Exception as e:
+                print(f"Download task failed: {e}")
+
     print(f"Last day of data download: {highest_day}")
     print("Done!")
 
